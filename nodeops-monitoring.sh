@@ -73,7 +73,7 @@ title="Logs-$hostname-$public_ip"
 job=$hostname-$public_ip
 folder_uuid=$(uuidgen)
 folder_name="$hostname-$public_ip-Dashboard"
-metric_name="Metrix-$hostname-$public_ip"
+metric_name="Metric-$hostname-$public_ip"
 echo "Job name is, $job"
 
 echo "Title name is $title"
@@ -203,7 +203,7 @@ echo "Updating Dashboard!"
 
 
 # file_content=$(<node-dashboard.json)
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/205ee5ff2392af6ea719b69ab4fa2a3c3bcaf5d9/node-metrics.json")
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/39e67c0feabc758d57fd78452b6dadffdb66308b/node-metrics.json")
 
 updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$job/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g")
 
