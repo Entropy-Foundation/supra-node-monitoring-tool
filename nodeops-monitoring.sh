@@ -218,6 +218,11 @@ echo "Dashboard Updated!"
 
 echo "Creating Dashboard"
 
-curl -X POST   https://monitoring.services.supra.com/api/dashboards/db   -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9'  -H 'Content-Type: application/json'   -d @new-node-dashboard.json
+result=$(curl -X POST   https://monitoring.services.supra.com/api/dashboards/db   -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9'  -H 'Content-Type: application/json'   -d @new-node-dashboard.json)
 
+read -p "Please specify e-mail for dashboard access: " email
+
+share_result=$(echo ${result} | jq -r --arg email "$email" '(.url) as $dashboard | {email: $email, dashboard: $dashboard}')
+
+echo -e "Share the following information with Supra Team to get access to the dashboard:\n$share_result"
 rm new-node-dashboard.json 
