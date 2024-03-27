@@ -10,6 +10,7 @@ fi
 echo "Updating package lists..."
 apt-get update -y
 
+
 # Create directory for keyrings
 echo "Creating directory for keyrings..."
 mkdir -p /etc/apt/keyrings
