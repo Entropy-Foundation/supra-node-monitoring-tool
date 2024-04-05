@@ -113,20 +113,21 @@ scrape_configs:
           __path__: "$log_path"
 EOF
 
+
+# Set permissions for the promtail.yml file
+chmod 0644 /etc/promtail/config.yml
+
+service promtail restart
+
+
+
 curl -X POST \
   'https://monitoring.services.supra.com/api/folders' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9' \
   -d "{ \"title\": \"$folder_name\", \"uid\": \"$folder_uuid\" }"
 
-
-# Set permissions for the promtail.yml file
-chmod 0644 /etc/promtail/config.yml
-service promtail restart
-
 echo "Updating Dashboard!"
-
-
 # file_content=$(<dashboard.json)
 file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/3433ad66515ad5c4dba1f3e1cba8006c76d3004b/node-logs.json")
 
@@ -148,20 +149,22 @@ curl -X POST   https://monitoring.services.supra.com/api/dashboards/db   -H 'Aut
 
 rm -rf new-dashboard.json 
 
+sleep 2
+
 echo "installing telegraf agent"
-sleep 3
 
 curl -s https://repos.influxdata.com/influxdata-archive_compat.key > influxdata-archive_compat.key
 echo '393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c influxdata-archive_compat.key' | sha256sum -c && cat influxdata-archive_compat.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg > /dev/null
 echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
 apt-get update && sudo apt-get install telegraf sysstat -y
 rm /etc/telegraf/telegraf.conf*
-wget -P /etc/telegraf/  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/498762912d9aad53cbf2aa3b269c87b321eaccde/telegraf.conf 
+curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/3d5b89c0fa4aafc69e57ae34263d396a15c4d1fc/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
 systemctl restart telegraf.service
 systemctl enable telegraf.service
 
-sleep 3
+echo "updating dashboard"
+sleep 2
 
 file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/d142575d1c89e135c32817baeeaa28bdafc396f3/telegraf-metrics.json")
 

@@ -146,7 +146,7 @@ yum update && yum install telegraf sysstat -y
 
 rm /etc/telegraf/telegraf.conf*
 
-curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/498762912d9aad53cbf2aa3b269c87b321eaccde/telegraf.conf  -o  /etc/telegraf/telegraf.conf
+curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/3d5b89c0fa4aafc69e57ae34263d396a15c4d1fc/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
 systemctl restart telegraf.service
 systemctl enable telegraf.service
@@ -173,4 +173,3 @@ echo "Creating Dashboard"
 curl -X POST   https://monitoring.services.supra.com/api/dashboards/db   -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9'  -H 'Content-Type: application/json'   -d @new-telegraf-metrics.json
 
 rm new-telegraf-metrics.json
-
