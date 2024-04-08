@@ -70,7 +70,7 @@ hostname=$(hostname)
 uuid=$(uuidgen)
 uuid_2=$(uuidgen)
 title="Logs-$hostname-$public_ip"
-job=$hostname-$public_ip
+job=$hostname
 folder_uuid=$(uuidgen)
 folder_name="$hostname-$public_ip-Dashboard"
 metric_name="Metric-$hostname-$public_ip"
@@ -109,7 +109,7 @@ scrape_configs:
       - targets:
         - localhost
         labels:
-          job: $hostname-$public_ip
+          job: $hostname
           __path__: "$log_path"
 EOF
 
