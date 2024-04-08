@@ -61,7 +61,7 @@ hostname=$(hostname)
 uuid=$(uuidgen)
 uuid_2=$(uuidgen)
 title="Logs-$hostname-$public_ip"
-job=$hostname
+job=$hostname-$public_ip
 folder_uuid=$(uuidgen)
 folder_name="$hostname-$public_ip-Dashboard"
 metric_name="Metric-$hostname-$public_ip"
@@ -99,7 +99,7 @@ scrape_configs:
       - targets:
         - localhost
         labels:
-          job: $hostname
+          job: $hostname-$public_ip
           __path__: "$log_path"
 EOF
 
@@ -138,15 +138,20 @@ sleep 2
 
 echo "installing telegraf agent"
 
-curl -s https://repos.influxdata.com/influxdata-archive_compat.key > influxdata-archive_compat.key
-echo '393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c influxdata-archive_compat.key' | sha256sum -c && cat influxdata-archive_compat.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg > /dev/null
-echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+[influxdb]
+name = InfluxData Repository - Stable
+baseurl = https://repos.influxdata.com/stable/\$basearch/main
+enabled = 1
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdata-archive_compat.key
+EOF
 
 yum update && yum install telegraf sysstat -y
 
 rm /etc/telegraf/telegraf.conf*
 
-curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/3d5b89c0fa4aafc69e57ae34263d396a15c4d1fc/telegraf.conf  -o  /etc/telegraf/telegraf.conf
+curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/f7ab40cfd09958a9a936611dbe22c422a92a930b/telegraf-centos.conf  -o  /etc/telegraf/telegraf.conf
 
 systemctl restart telegraf.service
 systemctl enable telegraf.service
