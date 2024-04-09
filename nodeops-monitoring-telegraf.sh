@@ -69,7 +69,7 @@ hostname=$(hostname)
 
 CPU_MAX=$(lscpu | grep '^CPU(s):' | awk '{print $2}')
 
-MEM_MAX=$(grep MemTotal /proc/meminfo | awk '{sub(/^[ \t]+/, "", $2); sub(/ kB$/, "", $2); print $2}')
+MEM_MAX=$(grep MemTotal /proc/meminfo | awk '{sub(/^[ \t]+/, "", $2); sub(/ kB$/, "", $2); print $2 * 1024}')
 
 DISK_SIZE=$(df -B1 / | awk 'NR==2 {print $2}')
 
