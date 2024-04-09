@@ -191,3 +191,12 @@ echo "Creating Dashboard"
 curl -X POST   https://monitoring.services.supra.com/api/dashboards/db   -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9'  -H 'Content-Type: application/json'   -d @new-telegraf-metrics.json
 
 rm new-telegraf-metrics.json
+
+
+read -p "Please specify e-mail for dashboard access: " email
+
+share_result=$(echo {email: $email, dashboard: $folder_name})
+
+echo  "Share the following information with Supra Team to get access to the dashboard:\n$share_result"
+
+echo "Grafana dashboard url:  https://monitoring.services.supra.com/dashboards/f/$folder_uuid"
