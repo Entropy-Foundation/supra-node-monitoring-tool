@@ -67,6 +67,12 @@ public_ip=$(curl ifconfig.me)
 # Get hostname
 hostname=$(hostname)
 
+CPU_MAX=$(lscpu | grep '^CPU(s):' | awk '{print $2}')
+
+MEM_MAX=$(grep MemTotal /proc/meminfo | awk '{sub(/^[ \t]+/, "", $2); sub(/ kB$/, "", $2); print $2}')
+
+DISK_SIZE=$(df -B1 / | awk 'NR==2 {print $2}')
+
 uuid=$(uuidgen)
 uuid_2=$(uuidgen)
 title="Logs-$hostname-$public_ip"
@@ -129,7 +135,7 @@ curl -X POST \
 
 echo "Updating Dashboard!"
 # file_content=$(<dashboard.json)
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/3433ad66515ad5c4dba1f3e1cba8006c76d3004b/node-logs.json")
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/58766426b95347313d30232b1720234089178303/node-logs.json")
 
 # Use sed to substitute the values in the JSON structure
 # updated_content=$(echo "$file_content" | sed "s/\"title\": \"\$title\"/\"title\": \"$title\"/g; s/\"uid\": \"\$uuid\"/\"uid\": \"$uuid\"/g")
@@ -160,16 +166,18 @@ apt-get update && sudo apt-get install telegraf sysstat -y
 rm /etc/telegraf/telegraf.conf*
 curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/3d5b89c0fa4aafc69e57ae34263d396a15c4d1fc/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
+curl -L https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/58766426b95347313d30232b1720234089178303/telegraf.service -o /lib/systemd/system/telegraf.service
+systemctl daemon-reload
 systemctl restart telegraf.service
 systemctl enable telegraf.service
 
 echo "updating dashboard"
 sleep 2
 
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/3a55555351a9bb93980400c8e7a41bdee8943ab3/telegraf-metrics.json")
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/a0465ff898f270fe3185bbef4436c8db6845fc2d/telegraf-metrics.json")
 
 
-updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$hostname/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g")
+updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$hostname/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g; s/{{ CPU_MAX }}/$CPU_MAX/g; s/{{ MEM_MAX }}/$MEM_MAX/g; s/{{ DISK_SIZE }}/$DISK_SIZE/g")
 # Write the updated content back to the file
 echo "$updated_content" > new-telegraf-metrics.json
 
