@@ -135,7 +135,7 @@ curl -X POST \
 
 echo "Updating Dashboard!"
 # file_content=$(<dashboard.json)
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/0809f56995ad7a498b4ae9225948ab57a20028cb/node-logs.json")
+file_content=$(curl -sL "https://gist.github.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/ccd84b760a6319209934e87aaebe5bcf5664f47a/node-logs.json")
 
 # Use sed to substitute the values in the JSON structure
 # updated_content=$(echo "$file_content" | sed "s/\"title\": \"\$title\"/\"title\": \"$title\"/g; s/\"uid\": \"\$uuid\"/\"uid\": \"$uuid\"/g")
