@@ -164,7 +164,7 @@ echo '393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c influxdat
 echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
 apt-get update && sudo apt-get install telegraf sysstat -y
 rm /etc/telegraf/telegraf.conf*
-curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/3d5b89c0fa4aafc69e57ae34263d396a15c4d1fc/telegraf.conf  -o  /etc/telegraf/telegraf.conf
+curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
 curl -L https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/58766426b95347313d30232b1720234089178303/telegraf.service -o /lib/systemd/system/telegraf.service
 systemctl daemon-reload
