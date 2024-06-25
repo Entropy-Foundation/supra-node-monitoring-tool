@@ -46,3 +46,5 @@ This tool assists node operators in setting up monitoring for their nodes. It au
 
 ## Note
 - Ensure to replace `/home/ubuntu/supra_configs/supra.log` with the correct log path for your setup.
+
+## List of Metrics
