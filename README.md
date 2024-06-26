@@ -3,6 +3,11 @@
 ## Overview
 This tool assists node operators in setting up monitoring for their nodes. It automates the process of installing and configuring Promtail, a log shipper, and creating a dashboard in Grafana to visualize the logs.
 
+## Dashboard with list of Metrics
+- You can also view the ongoing metrics setup by visiting and contributing to our monitoring dashboard [project](https://github.com/orgs/Entropy-Foundation/projects/13)
+  
+![supra-monitoring-dashboard](https://github.com/Entropy-Foundation/supra-node-monitoring-tool/assets/90824946/dd86df57-529a-4490-94b9-1fdb2ec3dc0d)
+
 ## Prerequisites
 - Ensure your email is invited into the Grafana Dashboard. If not, request the Supra team to add your email to access your dashboard.
 - Download the script with the following command:
@@ -47,4 +52,7 @@ This tool assists node operators in setting up monitoring for their nodes. It au
 ## Note
 - Ensure to replace `/home/ubuntu/supra_configs/supra.log` with the correct log path for your setup.
 
-## List of Metrics
+
+
+
+
