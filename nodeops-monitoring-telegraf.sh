@@ -35,7 +35,7 @@ echo "promtail installation completed."
 
 # Copy promtail service configuration
 echo "Copying promtail service configuration..."
- tee /etc/systemd/system/promtail.service << EOF
+tee /etc/systemd/system/promtail.service << EOF
 [Unit]
 Description=Promtail service
 After=network.target
@@ -54,15 +54,13 @@ EOF
 
 # Restart promtail service
 echo "Restarting promtail service..."
- systemctl daemon-reload
- systemctl restart promtail
+systemctl daemon-reload
+systemctl restart promtail
 
 echo "Done!"
 
-
-
 # Get public IP address
-public_ip=$(curl ifconfig.me)
+public_ip=$(curl -s ifconfig.me)
 
 # Get hostname
 hostname=$(hostname)
@@ -119,14 +117,21 @@ scrape_configs:
           __path__: "$log_path"
 EOF
 
-
 # Set permissions for the promtail.yml file
 chmod 0644 /etc/promtail/config.yml
 
 service promtail restart
 
+# Check if a dashboard already exists
+existing_dashboard=$(curl -s -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9' "https://monitoring.services.supra.com/api/search?query=$folder_name" | jq -r '.[0].uid')
 
+if [ "$existing_dashboard" != "null" ]; then
+    echo "A dashboard with the name $folder_name already exists."
+    echo "Existing Grafana dashboard URL: https://monitoring.services.supra.com/dashboards/f/$existing_dashboard"
+    exit 1
+fi
 
+# Create a new dashboard
 curl -X POST \
   'https://monitoring.services.supra.com/api/folders' \
   -H 'Content-Type: application/json' \
@@ -134,17 +139,10 @@ curl -X POST \
   -d "{ \"title\": \"$folder_name\", \"uid\": \"$folder_uuid\" }"
 
 echo "Updating Dashboard!"
-# file_content=$(<dashboard.json)
 file_content=$(curl -sL "https://gist.github.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/ccd84b760a6319209934e87aaebe5bcf5664f47a/node-logs.json")
-
-# Use sed to substitute the values in the JSON structure
-# updated_content=$(echo "$file_content" | sed "s/\"title\": \"\$title\"/\"title\": \"$title\"/g; s/\"uid\": \"\$uuid\"/\"uid\": \"$uuid\"/g")
-
 
 updated_content=$(echo "$file_content" | sed "s/\"title\": \"\$title\"/\"title\": \"$title\"/g; s/\"uid\": \"\$uuid\"/\"uid\": \"$uuid\"/g; s/job=\$job_name/job=\`$job\`/g; s/{{ folder_uuid }}/$folder_uuid/g")
 
-
-# Write the updated content back to the file
 echo "$updated_content" > new-dashboard.json
 
 echo "Dashboard Updated!"
@@ -176,13 +174,8 @@ sleep 2
 
 file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/5a5b11aae2d47636e2c8ca63c25f6ca8f3cce16a/telegraf-metrics.json")
 
-
 updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$hostname/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g; s/{{ CPU_MAX }}/$CPU_MAX/g; s/{{ MEM_MAX }}/$MEM_MAX/g; s/{{ DISK_SIZE }}/$DISK_SIZE/g")
-# Write the updated content back to the file
 echo "$updated_content" > new-telegraf-metrics.json
-
-# sed "s/{{ job_name }}/$job/g"  
-
 
 echo "Dashboard Updated!"
 
@@ -191,7 +184,6 @@ echo "Creating Dashboard"
 curl -X POST   https://monitoring.services.supra.com/api/dashboards/db   -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9'  -H 'Content-Type: application/json'   -d @new-telegraf-metrics.json
 
 rm new-telegraf-metrics.json
-
 
 read -p "Please specify e-mail for dashboard access: " email
 
