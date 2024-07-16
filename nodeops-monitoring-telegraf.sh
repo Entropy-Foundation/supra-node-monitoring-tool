@@ -90,6 +90,15 @@ echo "You entered: $log_path"
 read -p "Is this correct? (y/n) " confirm
 if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
     echo "Log file path confirmed: $log_path"
+
+    # Check if a dashboard already exists
+    existing_dashboard=$(curl -s -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9' "https://monitoring.services.supra.com/api/search?query=$folder_name" | jq -r '.[0].uid')
+
+    if [ "$existing_dashboard" != "null" ] && [ "$existing_dashboard" != "" ]; then
+        echo "A dashboard with the name $folder_name already exists."
+        echo "Existing Grafana dashboard URL: https://monitoring.services.supra.com/dashboards/f/$existing_dashboard"
+        exit 1
+    fi
 else
     echo "Log file path not confirmed. Please try again."
     exit 1
@@ -121,15 +130,6 @@ EOF
 chmod 0644 /etc/promtail/config.yml
 
 service promtail restart
-
-# Check if a dashboard already exists
-existing_dashboard=$(curl -s -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9' "https://monitoring.services.supra.com/api/search?query=$folder_name" | jq -r '.[0].uid')
-
-if [ "$existing_dashboard" != "null" ] && [ "$existing_dashboard" != "" ]; then
-    echo "A dashboard with the name $folder_name already exists."
-    echo "Existing Grafana dashboard URL: https://monitoring.services.supra.com/dashboards/f/$existing_dashboard"
-    exit 1
-fi
 
 # Create a new dashboard
 curl -X POST \
