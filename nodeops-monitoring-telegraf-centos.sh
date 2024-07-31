@@ -72,6 +72,7 @@ job=$hostname
 folder_uuid=$(uuidgen)
 folder_name="$hostname-$public_ip-Dashboard"
 metric_name="Metric-$hostname-$public_ip"
+export folder_name="$hostname-$public_ip-Dashboard"
 echo "Job name is, $job"
 
 echo "Title name is $title"
