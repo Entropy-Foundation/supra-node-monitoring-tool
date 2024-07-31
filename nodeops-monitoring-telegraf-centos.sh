@@ -115,6 +115,11 @@ service promtail restart
 systemctl enable promtail.service
 
 
+### Checking for the old dashboard and remove it if exist####
+
+curl -sL https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/cbdebff812ca79e7a26e53bed45f6d53d8dbe4f9/dashboard-check.sh | bash
+
+## creating dashboard
 curl -X POST \
   'https://monitoring.services.supra.com/api/folders' \
   -H 'Content-Type: application/json' \
