@@ -60,7 +60,18 @@ systemctl restart promtail
 echo "Done!"
 
 # Get public IP address
-public_ip=$(curl -s ifconfig.me)
+# public_ip=$(curl -s ifconfig.me)
+read -p "Please enter the Public IPV4 address of the server: " public_ip
+
+# Confirm the provided log path
+echo "You entered: $public_ip"
+read -p "Is this correct? (y/n) " confirm
+if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
+    echo "Public IPV4 address confirmed: $public_ip"
+else
+    echo "Public IPV4 address not confirmed. Please try again."
+    exit 1
+fi
 
 # Get hostname
 hostname=$(hostname)
@@ -74,7 +85,7 @@ DISK_SIZE=$(df -B1 / | awk 'NR==2 {print $2}')
 uuid=$(uuidgen)
 uuid_2=$(uuidgen)
 title="Logs-$hostname-$public_ip"
-job=$hostname
+job="$hostname-$public_ip"
 folder_uuid=$(uuidgen)
 folder_name="$hostname-$public_ip-Dashboard"
 metric_name="Metric-$hostname-$public_ip"
@@ -114,7 +125,7 @@ scrape_configs:
       - targets:
         - localhost
         labels:
-          job: $hostname
+          job: $job
           __path__: "$log_path"
 EOF
 
