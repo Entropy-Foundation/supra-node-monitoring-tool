@@ -60,7 +60,7 @@ systemctl restart promtail
 echo "Done!"
 
 # Get public IP address
-# public_ip=$(curl -s ifconfig.me)
+public_ip=$(curl -s ifconfig.me)
 read -p "Please enter the Public IPV4 address of the server: " public_ip
 
 # Confirm the provided log path
@@ -137,28 +137,54 @@ service promtail restart
 
 ### Checking for the old dashboard and remove it if exist####
 
-curl -sL https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/cbdebff812ca79e7a26e53bed45f6d53d8dbe4f9/dashboard-check.sh | bash
+echo "Deleting the Folder if exists"
+
+curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+     -H "Content-Type: application/json" \
+     -d "{
+            \"folder_name\": \"$folder_name\"
+         }" \
+     https://secure-api.services.supra.com/monitoring-supra-delete-folder
+
+# Create a new Folder
+echo "Creating new folder"
+
+echo "Folder Name: $folder_name"
+
+curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+     -H "Content-Type: application/json" \
+     -d "{
+            \"folder_name\": \"$folder_name\",
+            \"folder_uuid\": \"$folder_uuid\"
+         }" \
+     https://secure-api.services.supra.com/monitoring-supra-create-folder
 
 
-# Create a new dashboard
-curl -X POST \
-  'https://monitoring.services.supra.com/api/folders' \
-  -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9' \
-  -d "{ \"title\": \"$folder_name\", \"uid\": \"$folder_uuid\" }"
+echo "Created new folder"
 
-echo "Updating Dashboard!"
+
+echo "Updating Dashboard for Loki!"
 file_content=$(curl -sL "https://gist.github.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/ccd84b760a6319209934e87aaebe5bcf5664f47a/node-logs.json")
 
+# Update the JSON content with the desired values
 updated_content=$(echo "$file_content" | sed "s/\"title\": \"\$title\"/\"title\": \"$title\"/g; s/\"uid\": \"\$uuid\"/\"uid\": \"$uuid\"/g; s/job=\$job_name/job=\`$job\`/g; s/{{ folder_uuid }}/$folder_uuid/g")
 
+# Save the updated JSON to a file
 echo "$updated_content" > new-dashboard.json
 
 echo "Dashboard Updated!"
 
-echo "Creating Dashboard"
+echo "Creating Dashboard FOR LOKI IN GRAFANA"
 
-curl -X POST   https://monitoring.services.supra.com/api/dashboards/db   -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9'  -H 'Content-Type: application/json'   -d @new-dashboard.json 
+
+curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+     -H "Content-Type: application/json" \
+     -d "{\"data\": $updated_content}" \
+     https://secure-api.services.supra.com/monitoring-supra-create-dashboard
+
+
+echo "Dashboard creation request sent!"
+
 
 rm -rf new-dashboard.json 
 
@@ -178,21 +204,30 @@ systemctl daemon-reload
 systemctl restart telegraf.service
 systemctl enable telegraf.service
 
-echo "updating dashboard"
+echo "Updating Dashboard"
 sleep 2
 
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/5a5b11aae2d47636e2c8ca63c25f6ca8f3cce16a/telegraf-metrics.json")
+# Fetch the template file
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/bf2536770652857dea9969d6f645f27b3fafde98/telegraf-metrics.json")
 
+# Replace placeholders with actual values
 updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$hostname/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g; s/{{ CPU_MAX }}/$CPU_MAX/g; s/{{ MEM_MAX }}/$MEM_MAX/g; s/{{ DISK_SIZE }}/$DISK_SIZE/g")
 echo "$updated_content" > new-telegraf-metrics.json
 
 echo "Dashboard Updated!"
 
-echo "Creating Dashboard"
+echo "Creating Dashboard for Node Metrics"
 
-curl -X POST   https://monitoring.services.supra.com/api/dashboards/db   -H 'Authorization: Bearer glsa_RL9Ld2zAHE2aM5MUwGjOWoMmRAgxprHP_91dd26c9'  -H 'Content-Type: application/json'   -d @new-telegraf-metrics.json
+# Post the updated dashboard to the cloud function
+
+curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+     -H "Content-Type: application/json" \
+     -d "{\"data\": $updated_content}" \
+     https://secure-api.services.supra.com/monitoring-supra-create-dashboard
+
 
 rm new-telegraf-metrics.json
+
 
 read -p "Please specify e-mail for dashboard access: " email
 
