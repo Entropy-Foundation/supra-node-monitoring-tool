@@ -139,7 +139,7 @@ service promtail restart
 
 echo "Deleting the Folder if exists"
 
-curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+curl -X POST -H "x-api-key: $api_key" \
      -H "Content-Type: application/json" \
      -d "{
             \"folder_name\": \"$folder_name\"
@@ -151,14 +151,13 @@ echo "Creating new folder"
 
 echo "Folder Name: $folder_name"
 
-curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+curl -X POST -H "x-api-key: $api_key" \
      -H "Content-Type: application/json" \
      -d "{
             \"folder_name\": \"$folder_name\",
             \"folder_uuid\": \"$folder_uuid\"
          }" \
      https://secure-api.services.supra.com/monitoring-supra-create-folder
-
 
 echo "Created new folder"
 
@@ -177,7 +176,7 @@ echo "Dashboard Updated!"
 echo "Creating Dashboard FOR LOKI IN GRAFANA"
 
 
-curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+curl -X POST -H "x-api-key: $api_key" \
      -H "Content-Type: application/json" \
      -d "{\"data\": $updated_content}" \
      https://secure-api.services.supra.com/monitoring-supra-create-dashboard
@@ -220,14 +219,14 @@ echo "Creating Dashboard for Node Metrics"
 
 # Post the updated dashboard to the cloud function
 
-curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+curl -X POST -H "x-api-key: $api_key" \
      -H "Content-Type: application/json" \
      -d "{\"data\": $updated_content}" \
      https://secure-api.services.supra.com/monitoring-supra-create-dashboard
 
 
 rm new-telegraf-metrics.json
-
+unset api_key
 
 read -p "Please specify e-mail for dashboard access: " email
 
