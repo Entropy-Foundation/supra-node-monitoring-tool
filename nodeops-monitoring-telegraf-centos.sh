@@ -131,7 +131,7 @@ systemctl enable promtail.service
 
 echo "Deleting the Folder if exists"
 
-curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+curl -X POST -H "x-api-key: $api_key" \
      -H "Content-Type: application/json" \
      -d "{
             \"folder_name\": \"$folder_name\"
@@ -139,21 +139,18 @@ curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" 
      https://secure-api.services.supra.com/monitoring-supra-delete-folder
 
 
-# creating dashboard
-
+# Create a new Folder
 echo "Creating new folder"
 
 echo "Folder Name: $folder_name"
-echo "Folder UUDI: $folder_uuid"
 
-curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+curl -X POST -H "x-api-key: $api_key" \
      -H "Content-Type: application/json" \
      -d "{
             \"folder_name\": \"$folder_name\",
             \"folder_uuid\": \"$folder_uuid\"
          }" \
      https://secure-api.services.supra.com/monitoring-supra-create-folder
-
 
 echo "Created new folder"
 
@@ -175,11 +172,10 @@ echo "Dashboard Updated!"
 echo "Creating Dashboard FOR LOKI IN GRAFANA"
 
 
-curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+curl -X POST -H "x-api-key: $api_key" \
      -H "Content-Type: application/json" \
      -d "{\"data\": $updated_content}" \
      https://secure-api.services.supra.com/monitoring-supra-create-dashboard
-
 
 echo "Dashboard creation request sent!"
 
@@ -231,10 +227,11 @@ echo "Dashboard Updated!"
 
 echo "Creating Dashboard"
 
-curl -X POST -H "Authorization: Bearer AIzaSyD5ZGqOBqV1VbydmcoqXGskmNR9gHWbqkc" \
+curl -X POST -H "x-api-key: $api_key" \
      -H "Content-Type: application/json" \
      -d "{\"data\": $updated_content}" \
      https://secure-api.services.supra.com/monitoring-supra-create-dashboard
+
 
 
 rm new-telegraf-metrics.json
