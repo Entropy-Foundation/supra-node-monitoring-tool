@@ -14,11 +14,11 @@ This tool assists node operators in setting up monitoring for their nodes. It au
 
      For Ubuntu
     ```bash
-     wget -O  https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/master/nodeops-monitoring-telegraf.sh
+     wget  https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/master/nodeops-monitoring-telegraf.sh
     ```
      For Centos
     ```bash
-     wget -O  https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/master/nodeops-monitoring-telegraf-centos.sh
+     wget https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/master/nodeops-monitoring-telegraf-centos.sh
     ```
 
 - Change permission for the script file to be executable using the below command:
