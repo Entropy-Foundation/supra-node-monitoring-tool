@@ -140,6 +140,17 @@ else
 fi
 
 
+read -p "Please enter the supra binary path: " supra_location
+
+# Confirm the provided log path
+print_message "You entered: $supra_location"
+read -p "Is this correct? (y/n) " confirm
+if [[ "$confirm" =~ ^[Yy]$ ]]; then
+    print_message "supra binary path confirmed: $supra_location"
+else
+    print_error "supra binary path not confirmed. Please try again."
+    exit 1
+fi
 
 # Generate the promtail.yml file
 cat << EOF > /etc/promtail/config.yml
@@ -270,7 +281,13 @@ echo '393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c influxdat
 echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
 apt-get update && sudo apt-get install telegraf sysstat -y
 rm /etc/telegraf/telegraf.conf*
-curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
+# curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
+
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/cbf65213b286eccf08fe1aa7e67b4fcb7fbf18d9/telegraf-test.conf") 
+
+updated_content=$(echo "$file_content" | sed "s|{{ supra_location }}|$supra_location|g")
+
+echo "$updated_content" | sudo tee /etc/telegraf/telegraf.conf > /dev/null
 
 curl -L https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/58766426b95347313d30232b1720234089178303/telegraf.service -o /lib/systemd/system/telegraf.service
 systemctl daemon-reload
