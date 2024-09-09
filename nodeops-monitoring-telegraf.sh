@@ -283,7 +283,7 @@ apt-get update && sudo apt-get install telegraf sysstat -y
 rm /etc/telegraf/telegraf.conf*
 # curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/211e658f1d2c6f45eb87714fbad604629e458752/telegraf-test.conf") 
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/7e6d90f971f407b420f07f8e02909978ffbe2d8a/telegraf.conf") 
 
 updated_content=$(echo "$file_content" | sed "s|{{ supra_location }}|$supra_location|g; s|{{ agent_name }}|$job|g")
 
