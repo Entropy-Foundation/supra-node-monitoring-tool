@@ -283,13 +283,14 @@ apt-get update && sudo apt-get install telegraf sysstat -y
 rm /etc/telegraf/telegraf.conf*
 # curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/cbf65213b286eccf08fe1aa7e67b4fcb7fbf18d9/telegraf-test.conf") 
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/211e658f1d2c6f45eb87714fbad604629e458752/telegraf-test.conf") 
 
-updated_content=$(echo "$file_content" | sed "s|{{ supra_location }}|$supra_location|g")
+updated_content=$(echo "$file_content" | sed "s|{{ supra_location }}|$supra_location|g; s|{{ agent_name }}|$job|g")
 
 echo "$updated_content" | sudo tee /etc/telegraf/telegraf.conf > /dev/null
 
 curl -L https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/58766426b95347313d30232b1720234089178303/telegraf.service -o /lib/systemd/system/telegraf.service
+
 systemctl daemon-reload
 systemctl restart telegraf.service
 systemctl enable telegraf.service
@@ -301,7 +302,7 @@ print_message "Updating Dashboard for Telegraf Metrics..."
 file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/985fa5d9478441f8b62d68891fef695305f4f0c6/telegraf-metrics.json")
 
 # Replace placeholders with actual values
-updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$hostname/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g; s/{{ CPU_MAX }}/$CPU_MAX/g; s/{{ MEM_MAX }}/$MEM_MAX/g; s/{{ DISK_SIZE }}/$DISK_SIZE/g")
+updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$job/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g; s/{{ CPU_MAX }}/$CPU_MAX/g; s/{{ MEM_MAX }}/$MEM_MAX/g; s/{{ DISK_SIZE }}/$DISK_SIZE/g")
 
 # Save the updated JSON to a file
 echo "$updated_content" > /tmp/new-telegraf-metrics.json
