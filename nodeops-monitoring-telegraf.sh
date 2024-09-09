@@ -140,17 +140,7 @@ else
 fi
 
 
-read -p "Please enter the supra binary path: " supra_location
-
-# Confirm the provided log path
-print_message "You entered: $supra_location"
-read -p "Is this correct? (y/n) " confirm
-if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    print_message "supra binary path confirmed: $supra_location"
-else
-    print_error "supra binary path not confirmed. Please try again."
-    exit 1
-fi
+read -p "Please confirm this node is validator-node or rpc-node: " node_name
 
 # Generate the promtail.yml file
 cat << EOF > /etc/promtail/config.yml
@@ -283,9 +273,9 @@ apt-get update && sudo apt-get install telegraf sysstat -y
 rm /etc/telegraf/telegraf.conf*
 # curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/7e6d90f971f407b420f07f8e02909978ffbe2d8a/telegraf.conf") 
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/c602fa7182cf7318781918cd5f3abdc47f0019d0/telegraf.conf") 
 
-updated_content=$(echo "$file_content" | sed "s|{{ supra_location }}|$supra_location|g; s|{{ agent_name }}|$job|g")
+updated_content=$(echo "$file_content" | sed "s|{{ node_name }}|$node_name|g; s|{{ agent_name }}|$job|g")
 
 echo "$updated_content" | sudo tee /etc/telegraf/telegraf.conf > /dev/null
 
