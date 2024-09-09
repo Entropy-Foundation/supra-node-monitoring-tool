@@ -130,6 +130,10 @@ else
     exit 1
 fi
 
+
+read -p "Please confirm this node is validator-node or rpc-node: " node_name
+
+
 cat << EOF > /etc/promtail/config.yml
 server:
   http_listen_port: 9080
@@ -272,9 +276,9 @@ rm /etc/telegraf/telegraf.conf*
 
 # curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/7e6d90f971f407b420f07f8e02909978ffbe2d8a/telegraf-centos.conf") 
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/802c412bba9ed35ed7db25a4be991b4e40eb6bc6/telegraf-centos.conf") 
 
-updated_content=$(echo "$file_content" | sed "s|{{ supra_location }}|$supra_location|g; s|{{ agent_name }}|$job|g")
+updated_content=$(echo "$file_content" | sed "s|{{ node_name }}|$node_name|g; s|{{ agent_name }}|$job|g")
 
 echo "$updated_content" | sudo tee /etc/telegraf/telegraf.conf > /dev/null
 
