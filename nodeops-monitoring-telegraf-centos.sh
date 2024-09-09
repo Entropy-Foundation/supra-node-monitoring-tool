@@ -272,9 +272,9 @@ rm /etc/telegraf/telegraf.conf*
 
 # curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/cbf65213b286eccf08fe1aa7e67b4fcb7fbf18d9/telegraf-test.conf") 
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/7e6d90f971f407b420f07f8e02909978ffbe2d8a/telegraf-centos.conf") 
 
-updated_content=$(echo "$file_content" | sed "s|{{ supra_location }}|$supra_location|g")
+updated_content=$(echo "$file_content" | sed "s|{{ supra_location }}|$supra_location|g; s|{{ agent_name }}|$job|g")
 
 echo "$updated_content" | sudo tee /etc/telegraf/telegraf.conf > /dev/null
 
@@ -289,7 +289,7 @@ print_message "Updating Dashboard for Telegraf Metrics..."
 file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/985fa5d9478441f8b62d68891fef695305f4f0c6/telegraf-metrics.json")
 
 
-updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$hostname/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g; s/{{ metric_name }}/$metric_name/g; s/{{ CPU_MAX }}/$CPU_MAX/g; s/{{ MEM_MAX }}/$MEM_MAX/g; s/{{ DISK_SIZE }}/$DISK_SIZE/g")
+updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$job/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g; s/{{ metric_name }}/$metric_name/g; s/{{ CPU_MAX }}/$CPU_MAX/g; s/{{ MEM_MAX }}/$MEM_MAX/g; s/{{ DISK_SIZE }}/$DISK_SIZE/g")
 # Write the updated content back to the file
 echo "$updated_content" > /tmp/new-telegraf-metrics.json
 
