@@ -270,7 +270,13 @@ yum update && yum install telegraf sysstat -y
 
 rm /etc/telegraf/telegraf.conf*
 
-curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf-centos.conf  -o  /etc/telegraf/telegraf.conf
+# curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
+
+file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/cbf65213b286eccf08fe1aa7e67b4fcb7fbf18d9/telegraf-test.conf") 
+
+updated_content=$(echo "$file_content" | sed "s|{{ supra_location }}|$supra_location|g")
+
+echo "$updated_content" | sudo tee /etc/telegraf/telegraf.conf > /dev/null
 
 curl -L https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/58766426b95347313d30232b1720234089178303/telegraf.service -o /usr/lib/systemd/system/telegraf.service
 systemctl daemon-reload
