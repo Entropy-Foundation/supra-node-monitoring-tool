@@ -14,11 +14,11 @@ This tool assists node operators in setting up monitoring for their nodes. It au
 
      For Ubuntu
     ```bash
-     wget  https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/master/nodeops-monitoring-telegraf.sh
+     wget -O nodeops-monitoring-telegraf.sh https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/master/nodeops-monitoring-telegraf.sh
     ```
      For Centos
     ```bash
-     wget https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/master/nodeops-monitoring-telegraf-centos.sh
+     wget -O nodeops-monitoring-telegraf-centos.sh https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/master/nodeops-monitoring-telegraf-centos.sh
     ```
 
 - Change permission for the script file to be executable using the below command:
@@ -33,15 +33,19 @@ This tool assists node operators in setting up monitoring for their nodes. It au
     ```
 
 ## Usage
+- Please get the latest API KEY from the Supra Team before executing the below script.
+    ```bash
+     export api_key=LATEST_API_KEY        # Change LATEST_API_KEY with the value provided by the Supra team.
+    ```
 - Run the script file with sudo privileges. While running the script, you may be prompted to enter the log path. Please enter the whole log path as a value, which is `[Local Full Path To store configs]/supra.log`. An example output for a successful run:
     
     For ubuntu
     ```bash
-     sudo ./nodeops-monitoring-telegraf.sh
+     sudo -E ./nodeops-monitoring-telegraf.sh
     ```
     For Centos
     ```bash
-     sudo ./nodeops-monitoring-telegraf-centos.sh
+     sudo -E ./nodeops-monitoring-telegraf-centos.sh
     ```
 
 - The script will install Promtail, read the provided log path, and create a dashboard in Grafana for visualizing the logs.
