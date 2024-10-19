@@ -14,6 +14,7 @@ get_api_key(){
     read -p "Enter API key: " API_KEY
     export api_key= $API_KEY
 }
+get_api_key
 # Check if the script is running as root
 if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root."
