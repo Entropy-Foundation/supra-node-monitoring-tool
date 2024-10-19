@@ -18,8 +18,8 @@ fi
 
 # Check if API key is set
 if [ -z "$api_key" ]; then
-  print_error "API key is missing."
-  exit 1
+    read -p "Enter API key: " API_KEY
+    export api_key=$API_KEY
 fi
 
 URL="https://secure-api.services.supra.com"
