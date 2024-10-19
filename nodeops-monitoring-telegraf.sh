@@ -10,11 +10,6 @@ print_error() {
     echo -e "\n\033[1;31mERROR: $1\033[0m"
 }
 
-get_api_key(){
-    read -p "Enter API key: " API_KEY
-    export api_key= $API_KEY
-}
-get_api_key
 # Check if the script is running as root
 if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root."
@@ -23,8 +18,8 @@ fi
 
 # Check if API key is set
 if [ -z "$api_key" ]; then
-  print_error "API key is missing."
-  exit 1
+    read -p "Enter API key: " API_KEY
+    export api_key=$API_KEY
 fi
 
 URL="https://secure-api.services.supra.com"
