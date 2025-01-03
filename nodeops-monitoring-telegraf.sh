@@ -139,8 +139,6 @@ else
 fi
 
 
-read -p "Please confirm this node is validator-node or rpc-node: " node_name
-
 # Generate the promtail.yml file
 cat << EOF > /etc/promtail/config.yml
 server:
@@ -288,7 +286,21 @@ sleep 2
 
 # Updating the Dashboard for Telegraf Metrics
 print_message "Updating Dashboard for Telegraf Metrics..."
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/0c38667840e69192c21a2665d077a3d44331c566/node-metrics.json")
+# Prompt the user for input
+read -p "Please confirm this node is validator-node or rpc-node: " node_name
+
+# Check the input and set the file URL accordingly
+if [ "$node_name" == "validator-node" ]; then
+  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/42390c0348569738b8e685ee90920b325f2fa42e/telegraf-vals.json"
+elif [ "$node_name" == "rpc-node" ]; then
+  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/42390c0348569738b8e685ee90920b325f2fa42e/telegraf-rpc.json"
+else
+  echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
+  exit 1
+fi
+
+# Download the selected configuration file
+file_content=$(curl -sL "$file_url")
 
 # Replace placeholders with actual values
 updated_content=$(echo "$file_content" | sed "s/{{ uuid_2 }}/$uuid_2/g; s/{{ job_name }}/$job/g; s/{{ folder_uuid }}/$folder_uuid/g; s/{{ metric_name }}/$metric_name/g; s/{{ CPU_MAX }}/$CPU_MAX/g; s/{{ total_mem }}/$total_mem/g; s/{{ total_disk }}/$total_disk/g")
