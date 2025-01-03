@@ -291,9 +291,9 @@ read -p "Please confirm this node is validator-node or rpc-node: " node_name
 
 # Check the input and set the file URL accordingly
 if [ "$node_name" == "validator-node" ]; then
-  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/42390c0348569738b8e685ee90920b325f2fa42e/telegraf-vals.json"
+  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/5a05241715569abc5a5dbf427fef25ef7dda8bb3/telegraf-vals.json"
 elif [ "$node_name" == "rpc-node" ]; then
-  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/42390c0348569738b8e685ee90920b325f2fa42e/telegraf-rpc.json"
+  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/5a05241715569abc5a5dbf427fef25ef7dda8bb3/telegraf-rpc.json"
 else
   echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
   exit 1
