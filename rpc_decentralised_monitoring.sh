@@ -1,234 +1,4 @@
 #!/bin/bash
-
-# Function to print messages in a consistent format
-print_message() {
-    echo -e "\n\033[1;34m$1\033[0m"
-}
-
-# Function to print error messages
-print_error() {
-    echo -e "\n\033[1;31mERROR: $1\033[0m"
-}
-
-# Check if running as root
-if [ "$EUID" -ne 0 ]; then
-    print_error "This script must be run as root."
-    exit 1
-fi
-
-# Function to check if command executed successfully
-check_status() {
-    if [ $? -eq 0 ]; then
-        echo "✓ $1 completed successfully"
-    else
-        echo "✗ Error: $1 failed"
-        exit 1
-    fi
-}
-
-# Function to detect OS
-detect_os() {
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        OS=$ID
-    else
-        echo "Cannot detect OS"
-        exit 1
-    fi
-}
-
-# Function to check Docker installation
-check_docker() {
-    if command -v docker &> /dev/null; then
-        echo "Docker is already installed"
-        docker --version
-        if sudo docker run hello-world &> /dev/null; then
-            echo "Docker is working properly"
-            return 0
-        else
-            echo "Docker is installed but not working properly. Proceeding with repair..."
-            return 1
-        fi
-    else
-        echo "Docker is not installed"
-        return 1
-    fi
-}
-
-# Function to check Docker Compose installation
-check_docker_compose() {
-    if docker compose version &> /dev/null; then
-        echo "Docker Compose (new version) is already installed and working"
-        docker compose version
-        return 0
-    elif docker-compose --version &> /dev/null; then
-        echo "Old docker-compose found. Will upgrade to new Docker Compose"
-        return 1
-    else
-        echo "Docker Compose is not installed"
-        return 1
-    fi
-}
-
-# Function to install Docker
-install_docker() {
-    echo "Downloading Docker installation script..."
-    wget -O get-docker.sh https://get.docker.com
-    check_status "Docker script download"
-
-    chmod +x get-docker.sh
-    check_status "Setting execute permission"
-
-    echo "Installing Docker..."
-    sudo ./get-docker.sh
-    check_status "Docker installation"
-
-    echo "Starting Docker service..."
-    sudo systemctl start docker
-    sudo systemctl enable docker
-    check_status "Docker service startup"
-
-    # Clean up
-    rm get-docker.sh
-}
-
-# Function to setup Docker permissions
-setup_docker_permissions() {
-    # Check if user is already in docker group
-    if groups $USER | grep &>/dev/null '\bdocker\b'; then
-        echo "User $USER is already in docker group"
-    else
-        echo "Setting up Docker permissions..."
-        sudo groupadd docker 2>/dev/null || true
-        sudo usermod -aG docker $USER
-        check_status "Docker permission setup"
-        echo "Note: You'll need to log out and log back in for group changes to take effect"
-    fi
-}
-
-# Main installation process
-echo "Starting Docker setup verification..."
-
-# Detect OS
-detect_os
-echo "Detected OS: $OS"
-
-# Check and install Docker if needed
-if ! check_docker; then
-    install_docker
-fi
-
-# Setup Docker permissions
-setup_docker_permissions
-
-# Check and fix Docker Compose
-if ! check_docker_compose; then
-    if command -v docker-compose &> /dev/null; then
-        echo "Removing old docker-compose..."
-        if [ "$OS" = "ubuntu" ]; then
-            sudo apt remove docker-compose
-        elif [ "$OS" = "centos" ]; then
-            sudo yum remove docker-compose
-        fi
-    fi
-    
-    echo "Docker Compose plugin will be installed via Docker installation"
-    # Modern Docker installations include Docker Compose as a plugin
-    # Verify installation
-    if ! docker compose version &> /dev/null; then
-        echo "Installing Docker Compose plugin..."
-        if [ "$OS" = "ubuntu" ]; then
-            sudo apt-get update
-            sudo apt-get install -y docker-compose-plugin
-        elif [ "$OS" = "centos" ]; then
-            sudo yum install -y docker-compose-plugin
-        fi
-    fi
-    check_status "Docker Compose installation"
-fi
-
-# Final verification
-echo -e "\nFinal Verification:"
-echo "Docker version:"
-docker --version
-echo -e "\nDocker Compose version:"
-docker compose version
-echo -e "\nTesting Docker:"
-docker run hello-world
-
-echo -e "\nSetup process completed!"
-
-
-check_jq() {
-    if command -v jq &> /dev/null; then
-        echo "jq is already installed"
-        jq --version
-        return 0
-    else
-        echo "jq is not installed"
-        return 1
-    fi
-}
-
-
-
-install_jq() {
-    echo "Installing jq..."
-    if [ "$OS" = "ubuntu" ]; then
-        sudo apt-get update
-        sudo apt-get install -y jq
-    elif [ "$OS" = "centos" ]; then
-        sudo yum install -y epel-release
-        sudo yum install -y jq
-    else
-        echo "Unsupported OS for jq installation"
-        exit 1
-    fi
-    check_status "jq installation"
-}
-
-if ! check_jq; then
-    install_jq
-fi
-
-check_sysstat() {
-    if command -v sadf &> /dev/null; then
-        echo "sysstat is already installed"
-        sysstat --version
-        return 0
-    else
-        echo "sysstat is not installed"
-        return 1
-    fi
-}
-
-
-install_sysstat() {
-    echo "Installing sysstat..."
-    if [ "$OS" = "ubuntu" ]; then
-        sudo apt-get update
-        sudo apt-get install -y sysstat
-        # Enable sysstat data collection
-        sudo sed -i 's/ENABLED="false"/ENABLED="true"/' /etc/default/sysstat
-        sudo systemctl enable sysstat
-        sudo systemctl start sysstat
-    elif [ "$OS" = "centos" ]; then
-        sudo yum install -y sysstat
-        sudo systemctl enable sysstat
-        sudo systemctl start sysstat
-    else
-        echo "Unsupported OS for sysstat installation"
-        exit 1
-    fi
-    check_status "sysstat installation"
-}
-
-# Add this code block before creating the telegraf.conf file
-if ! check_sysstat; then
-    install_sysstat
-fi
-
-
 read -r -p "Please enter the log path: " log_path
 
 
@@ -241,51 +11,52 @@ public_ip=$(curl -s ifconfig.me)
 
 # Create necessary directories
 print_message "Creating directories..."
-mkdir -p grafana/provisioning/datasources
-mkdir -p grafana/provisioning/dashboards
-mkdir -p grafana/dashboards
+# mkdir -p grafana/provisioning/datasources
+# mkdir -p grafana/provisioning/dashboards
+# mkdir -p grafana/dashboards
 mkdir -p telegraf
-mkdir -p loki
+# mkdir -p loki
 mkdir -p promtail
-mkdir -p influxdb/config
+# mkdir -p influxdb/config
 
 
 # First ensure all required files exist
 print_message "Creating necessary files if they don't exist..."
-touch grafana/provisioning/datasources/datasources.yaml
-touch grafana/provisioning/dashboards/local.yaml
-touch loki/local-config.yaml
+# touch grafana/provisioning/datasources/datasources.yaml
+# touch grafana/provisioning/dashboards/local.yaml
+# touch loki/local-config.yaml
 touch promtail/config.yaml
 touch telegraf/telegraf.conf
-touch influxdb/config/config.yml
+# touch influxdb/config/config.yml
 
 # Set proper permissions
 print_message "Setting permissions..."
 # Set directory permissions
-find grafana promtail loki telegraf influxdb -type d -exec chmod 755 {} \;
+# find grafana promtail loki telegraf influxdb -type d -exec chmod 755 {} \;
+find promtail telegraf -type d -exec chmod 755 {} \;
 
 # Set file permissions for configuration files
-find grafana/provisioning -type f -exec chmod 644 {} \;
-chmod 644 loki/local-config.yaml
+# find grafana/provisioning -type f -exec chmod 644 {} \;
+# chmod 644 loki/local-config.yaml
 chmod 644 promtail/config.yaml
 chmod 644 telegraf/telegraf.conf
-chmod 644 influxdb/config/config.yml
+# chmod 644 influxdb/config/config.yml
 
 # Ensure parent directories are accessible
-chmod 755 grafana/provisioning
-chmod 755 grafana/provisioning/datasources
-chmod 755 grafana/provisioning/dashboards
-chmod 755 loki
+# chmod 755 grafana/provisioning
+# chmod 755 grafana/provisioning/datasources
+# chmod 755 grafana/provisioning/dashboards
+# chmod 755 loki
 chmod 755 promtail
 chmod 755 telegraf
-chmod 755 influxdb/config
+# chmod 755 influxdb/config
 
 
 # Ensure directories are created before proceeding
-if [ ! -d "grafana/dashboards" ]; then
-    print_error "Failed to create directories"
-    exit 1
-fi
+# if [ ! -d "grafana/dashboards" ]; then
+#     print_error "Failed to create directories"
+#     exit 1
+# fi
 
 # Get system metrics
 hostname=$(hostname)
@@ -302,93 +73,93 @@ metric_name="Metric-$hostname-$public_ip"
 export folder_name="$hostname-$public_ip-Dashboard"
 
 # Generate secure random passwords
-INFLUXDB_PASSWORD=$(openssl rand -base64 32)
-INFLUXDB_ADMIN_TOKEN=$(openssl rand -hex 32)
+# INFLUXDB_PASSWORD=$(openssl rand -base64 32)
+# INFLUXDB_ADMIN_TOKEN=$(openssl rand -hex 32)
 
 
 # echo "INFLUXDB_PASSWORD is $INFLUXDB_PASSWORD"
 
 
 # Create InfluxDB configuration
-cat > influxdb/config/config.yml << EOF
-bolt-path: /var/lib/influxdb2/influxdb.bolt
-engine-path: /var/lib/influxdb2/engine
-http-bind-address: :8086
-EOF
+# cat > influxdb/config/config.yml << EOF
+# bolt-path: /var/lib/influxdb2/influxdb.bolt
+# engine-path: /var/lib/influxdb2/engine
+# http-bind-address: :8086
+# EOF
 
 # Update Grafana datasources configuration to include InfluxDB
-cat > grafana/provisioning/datasources/datasources.yaml << EOF
-apiVersion: 1
+# cat > grafana/provisioning/datasources/datasources.yaml << EOF
+# apiVersion: 1
 
-datasources:
-  - name: Loki
-    type: loki
-    access: proxy
-    url: http://loki:3100
-    isDefault: true
-    editable: false
+# datasources:
+#   - name: Loki
+#     type: loki
+#     access: proxy
+#     url: http://loki:3100
+#     isDefault: true
+#     editable: false
 
-  - name: InfluxDB
-    type: influxdb
-    access: proxy
-    url: http://influxdb:8086
-    secureJsonData:
-      token: ${INFLUXDB_ADMIN_TOKEN}
-    jsonData:
-      version: Flux
-      organization: myorg
-      defaultBucket: supra-metrics
-      tlsSkipVerify: true
-    isDefault: false
-    editable: false
+#   - name: InfluxDB
+#     type: influxdb
+#     access: proxy
+#     url: http://influxdb:8086
+#     secureJsonData:
+#       token: ${INFLUXDB_ADMIN_TOKEN}
+#     jsonData:
+#       version: Flux
+#       organization: myorg
+#       defaultBucket: supra-metrics
+#       tlsSkipVerify: true
+#     isDefault: false
+#     editable: false
 
-EOF
+# EOF
 
-cat > loki/local-config.yaml << EOF
-auth_enabled: false
+# cat > loki/local-config.yaml << EOF
+# auth_enabled: false
 
-server:
-  http_listen_port: 3100
-  http_listen_address: 0.0.0.0
+# server:
+#   http_listen_port: 3100
+#   http_listen_address: 0.0.0.0
 
-common:
-  path_prefix: /etc/loki
-  storage:
-    filesystem:
-      chunks_directory: /etc/loki/chunks
-      rules_directory: /etc/loki/rules
-  replication_factor: 1
-  ring:
-    instance_addr: 0.0.0.0
-    kvstore:
-      store: inmemory
+# common:
+#   path_prefix: /etc/loki
+#   storage:
+#     filesystem:
+#       chunks_directory: /etc/loki/chunks
+#       rules_directory: /etc/loki/rules
+#   replication_factor: 1
+#   ring:
+#     instance_addr: 0.0.0.0
+#     kvstore:
+#       store: inmemory
 
-schema_config:
-  configs:
-    - from: 2020-05-15
-      store: boltdb-shipper
-      object_store: filesystem
-      schema: v11
-      index:
-        prefix: index_
-        period: 24h
-EOF
+# schema_config:
+#   configs:
+#     - from: 2020-05-15
+#       store: boltdb-shipper
+#       object_store: filesystem
+#       schema: v11
+#       index:
+#         prefix: index_
+#         period: 24h
+# EOF
 curl -o telegraf/check_port.sh https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/131f56b49ea294d320b159a379775f7d63b50acb/check_port.sh
 chmod +x telegraf/check_port.sh
 
-curl -o telegraf/total_transactions.sh https://gist.githubusercontent.com/skadam-supra/969ef0177876b0e0ab7ac5da72b4cb94/raw/9b20fec3a51a0653234f664cd526931b0b8d27a3/total_transactions.sh
+curl -o telegraf/total_transactions.sh https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/671ecc535adb594d771029d44b6f2d58cd9c9106/total_transaction_2.sh
 chmod +x telegraf/total_transactions.sh
 
-curl -o telegraf/epoch.py https://gist.githubusercontent.com/skadam-supra/29ab72312d1b516638e78754e7ce43e1/raw/bedecafaffa5b7592a1aeb788a784382b1e06f45/epoch.py
+curl -o telegraf/epoch.py https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/671ecc535adb594d771029d44b6f2d58cd9c9106/epoch.py
 chmod +x telegraf/epoch.py
 
-curl -o telegraf/vals_participate.sh https://gist.githubusercontent.com/skadam-supra/7cdaa51480d8e53ec0c01876b0082714/raw/c8de835936f2778a4f5dbecb707caad82d02c4c5/vals_participate.sh
+curl -o telegraf/vals_participate.sh https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/671ecc535adb594d771029d44b6f2d58cd9c9106/vals_count.sh
 chmod +x telegraf/vals_participate.sh
 
-curl -o telegraf/block_rate.py https://gist.githubusercontent.com/skadam-supra/111fbf41364c5d5526d19b2b5c8c8c8c/raw/ff117f8b240902b8fc8522ae9b7418d1a1514ca8/block_rate.py
+curl -o telegraf/block_rate.py https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/671ecc535adb594d771029d44b6f2d58cd9c9106/block_rate.py
 chmod +x telegraf/block_rate.py
 
-curl -o telegraf/vals_count.sh https://gist.githubusercontent.com/skadam-supra/0cfa7429e79a5560213697bfa68f86ed/raw/ea6541472e316f2c2cf24e3062eefeffec674bd5/vals_count.sh
+curl -o telegraf/vals_count.sh https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/671ecc535adb594d771029d44b6f2d58cd9c9106/vals_participate.sh
 chmod +x telegraf/vals_count.sh
 
 curl -o telegraf/sync.py https://gist.githubusercontent.com/skadam-supra/32dd5597728051d367c11615718fbab8/raw/cbfd759658976d40ea12459a3684c0d1dbe6d7fb/sync.py

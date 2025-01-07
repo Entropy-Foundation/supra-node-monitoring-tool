@@ -124,20 +124,30 @@ export folder_name="$hostname-$public_ip-Dashboard"
 
 print_message "Job name is: $job"
 print_message "Title name is: $title"
-
+print_message "mention the log directory path without mentioning the log directory"
 # Ask the user for the log file path
-read -p "Please enter the log file path: " log_path
-
+read -p "Please enter the log directory path: " log_dir
 # Confirm the provided log path
-print_message "You entered: $log_path"
+print_message "You entered: $log_dir"
 read -p "Is this correct? (y/n) " confirm
 if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    print_message "Log file path confirmed: $log_path"
+    print_message "Log directory path confirmed: $log_dir"
 else
-    print_error "Log file path not confirmed. Please try again."
+    print_error "Log directory path not confirmed. Please try again."
     exit 1
 fi
-
+# Prompt the user for input
+read -p "Please confirm this node is validator-node or rpc-node: " node_name
+# Check the input and set the file URL accordingly
+if [ "$node_name" == "validator-node" ]; then
+  log_path="$log_dir/supra_node_logs/*.log*"
+elif [ "$node_name" == "rpc-node" ]; then
+  log_path="$log_dir/rpc_node_logs/*.log*"
+else
+  echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
+  exit 1
+fi
+# log_path="$log_dir/smr-node_logs/*.log*"
 
 # Generate the promtail.yml file
 cat << EOF > /etc/promtail/config.yml
@@ -270,24 +280,62 @@ apt-get update && sudo apt-get install telegraf sysstat -y
 rm /etc/telegraf/telegraf.conf*
 # curl -L  https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/83dd5336c537ae7e6fcfda6ba5aaacc1c575bbdb/telegraf.conf  -o  /etc/telegraf/telegraf.conf
 
-file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/5bcff9615f80174cb2acf0b9877f2578a29f7cef/telegraf-1.conf") 
+# Check the input and set the file URL accordingly
+if [ "$node_name" == "validator-node" ]; then
+  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/1bfff68f9b9a3a7065375ee8dce92fba72e5245f/telegraf-vals.conf"
+elif [ "$node_name" == "rpc-node" ]; then
+  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/1bfff68f9b9a3a7065375ee8dce92fba72e5245f/telegraf-rpc.conf"
+else
+  echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
+  exit 1
+fi
 
-updated_content=$(echo "$file_content" | sed "s|{{ node_name }}|$node_name|g; s|{{ agent_name }}|$job|g")
+# file_content=$(curl -sL "https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/5bcff9615f80174cb2acf0b9877f2578a29f7cef/telegraf-1.conf") 
+file_content=$(curl -sL "$file_url")
+
+updated_content=$(echo "$file_content" | sed "s|{{ agent_name }}|$job|g; s|{{ LOG_PATH }}|$log_dir|g")
 
 echo "$updated_content" | sudo tee /etc/telegraf/telegraf.conf > /dev/null
 
-curl -L https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/58766426b95347313d30232b1720234089178303/telegraf.service -o /lib/systemd/system/telegraf.service
 
+read -p "Please provide the user name which you want to run the telegraf service: " node_name
+
+# curl -L https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/58766426b95347313d30232b1720234089178303/telegraf.service -o /lib/systemd/system/telegraf.service
+cat << EOF > /lib/systemd/system/telegraf.service
+[Unit]
+Description=Telegraf
+Documentation=https://github.com/influxdata/telegraf
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+NotifyAccess=all
+EnvironmentFile=-/etc/default/telegraf
+User=$user
+#ImportCredential=telegraf.*
+ExecStart=/usr/bin/telegraf -config /etc/telegraf/telegraf.conf -config-directory /etc/telegraf/telegraf.d $TELEGRAF_OPTS
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartForceExitStatus=SIGPIPE
+KillMode=mixed
+TimeoutStopSec=5
+LimitMEMLOCK=8M:8M
+#PrivateMounts=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
 systemctl daemon-reload
 systemctl restart telegraf.service
 systemctl enable telegraf.service
 
 sleep 2
+apt install jq -y && curl -s https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/0ee36e564761e803268edfac7487ccc83da84cc8/geo.sh | bash -s > /tmp/geo.json
 
 # Updating the Dashboard for Telegraf Metrics
 print_message "Updating Dashboard for Telegraf Metrics..."
-# Prompt the user for input
-read -p "Please confirm this node is validator-node or rpc-node: " node_name
+
 
 # Check the input and set the file URL accordingly
 if [ "$node_name" == "validator-node" ]; then
