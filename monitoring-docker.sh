@@ -193,22 +193,22 @@ case $delete_status in
     echo "Folder not found. Proceeding to create a new folder."
     ;;
   400)
-    print_error "Error 400: Please enter a valid/updated API key."
+    echo "Error 400: Please enter a valid/updated API key."
     rm /tmp/delete_response.txt
     exit 1
     ;;
   401)
-    print_error "Error 401: Unauthorized access. Please check your API key."
+    echo "Error 401: Unauthorized access. Please check your API key."
     rm /tmp/delete_response.txt
     exit 1
     ;;
   403)
-    print_error "Error 403: Please provide your public IPv4 to whitelist."
+    echo "Error 403: Please provide your public IPv4 to whitelist."
     rm /tmp/delete_response.txt
     exit 1
     ;;
   *)
-    print_error "Failed to delete folder. HTTP status: $delete_status"
+    echo "Failed to delete folder. HTTP status: $delete_status"
     echo "Response body: $delete_response_body"
     rm /tmp/delete_response.txt
     exit 1
@@ -229,7 +229,7 @@ create_response_body=$(head -n -1 <<< "$create_response")
 if [ "$create_status" -eq 200 ]; then
   echo "Created new folder successfully."
 else
-  print_error "Failed to create folder. HTTP status: $create_status"
+  echo "Failed to create folder. HTTP status: $create_status"
   echo "Response body: $create_response_body"
   rm /tmp/create_response.txt
   exit 1
@@ -260,7 +260,7 @@ create_dashboard_response_body=$(head -n -1 <<< "$create_dashboard_response")
 if [ "$create_dashboard_status" -eq 200 ]; then
   echo "Dashboard creation request sent successfully!"
 else
-  print_error "Failed to create dashboard. HTTP status: $create_dashboard_status"
+  echo "Failed to create dashboard. HTTP status: $create_dashboard_status"
   echo "Response body: $create_dashboard_response_body"
   rm /tmp/create_dashboard_response.txt
   rm /tmp/new-dashboard.json
@@ -300,7 +300,7 @@ create_telegraf_dashboard_response_body=$(head -n -1 <<< "$create_telegraf_dashb
 
 # Check if HTTP status code is numeric
 if ! [[ "$create_telegraf_dashboard_status" =~ ^[0-9]+$ ]]; then
-  print_error "Invalid HTTP status code received: $create_telegraf_dashboard_status"
+  echo "Invalid HTTP status code received: $create_telegraf_dashboard_status"
   echo "Response body: $create_telegraf_dashboard_response_body"
   [ -f /tmp/create_telegraf_dashboard_response.txt ] && rm /tmp/create_telegraf_dashboard_response.txt
   [ -f /tmp/new-telegraf-metrics.json ] && rm /tmp/new-telegraf-metrics.json
@@ -311,7 +311,7 @@ fi
 if [ "$create_telegraf_dashboard_status" -eq 200 ]; then
   echo "Telegraf Metrics Dashboard creation request sent successfully!"
 else
-  print_error "Failed to create Telegraf Metrics Dashboard. HTTP status: $create_telegraf_dashboard_status"
+  echo "Failed to create Telegraf Metrics Dashboard. HTTP status: $create_telegraf_dashboard_status"
   echo "Response body: $create_telegraf_dashboard_response_body"
   [ -f /tmp/create_telegraf_dashboard_response.txt ] && rm /tmp/create_telegraf_dashboard_response.txt
   [ -f /tmp/new-telegraf-metrics.json ] && rm /tmp/new-telegraf-metrics.json
