@@ -51,9 +51,9 @@ export folder_name="$hostname-$public_ip-Dashboard"
 
 # Check the input and set the file URL accordingly
 if [ "$node_name" == "validator-node" ]; then
-  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/af6ad516dc3dfb8c2d3952956fee705a03895c36/telegraf-vals.conf"
+  file_url="https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/refs/heads/master/metrics-scripts/telegraf-vals.conf"
 elif [ "$node_name" == "rpc-node" ]; then
-  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/af6ad516dc3dfb8c2d3952956fee705a03895c36/telegraf-rpc.conf"
+  file_url="https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/refs/heads/master/metrics-scripts/telegraf-rpc.conf"
 else
   echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
   exit 1
@@ -127,7 +127,7 @@ services:
     entrypoint: >
       /bin/sh -c '
       apt-get update &&
-      apt-get install -y sysstat python3 python3-pip jq docker.io && pip3 install requests python-dateutil --break-system-packages && curl -s https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/0ee36e564761e803268edfac7487ccc83da84cc8/geo.sh | bash -s > /tmp/geo.json &&
+      apt-get install -y sysstat python3 python3-pip jq docker.io && pip3 install requests python-dateutil --break-system-packages && curl -s https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/refs/heads/master/metrics-scripts/geo.sh | bash -s > /tmp/geo.json &&
       mkdir -p /etc/default &&
       echo "ENABLED=\"true\"" > /etc/default/sysstat &&
       service sysstat start || true &&
@@ -237,7 +237,7 @@ fi
 
 # Update the Dashboard for Loki
 echo "Updating Dashboard for Loki..."
-file_content=$(curl -sL "https://gist.github.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/ccd84b760a6319209934e87aaebe5bcf5664f47a/node-logs.json")
+file_content=$(curl -sL "https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/refs/heads/master/metrics-scripts/node-logs.json")
 
 # Update the JSON content with the desired values
 updated_content=$(echo "$file_content" | sed "s/\"title\": \"\$title\"/\"title\": \"$title\"/g; s/\"uid\": \"\$uuid\"/\"uid\": \"$uuid\"/g; s/job=\$job_name/job=\`$job\`/g; s/{{ folder_uuid }}/$folder_uuid/g")
@@ -270,9 +270,9 @@ fi
 
 # Check the input and set the file URL accordingly
 if [ "$node_name" == "validator-node" ]; then
-  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/af6ad516dc3dfb8c2d3952956fee705a03895c36/telegraf-vals.json"
+  file_url="https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/refs/heads/master/metrics-scripts/telegraf-vals.json"
 elif [ "$node_name" == "rpc-node" ]; then
-  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/af6ad516dc3dfb8c2d3952956fee705a03895c36/telegraf-rpc.json"
+  file_url="https://raw.githubusercontent.com/Entropy-Foundation/supra-node-monitoring-tool/refs/heads/master/metrics-scripts/telegraf-rpc.json"
 else
   echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
   exit 1
