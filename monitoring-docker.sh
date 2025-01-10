@@ -268,7 +268,7 @@ else
   echo "Failed to create dashboard. HTTP status: $create_dashboard_status"
   echo "Response body: $create_dashboard_response_body"
   rm /tmp/create_dashboard_response.txt
-  rm /tmp/new-dashboard.json
+  rm /new-dashboard.json
   exit 1
 fi
 
