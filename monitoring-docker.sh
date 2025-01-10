@@ -2,6 +2,11 @@
 read -r -p "Please enter the log path: " log_dir
 read -r -p "Please confirm this node is validator-node or rpc-node: " node_name
 
+# Check if API key is set
+if [ -z "$api_key" ]; then
+    read -p "Enter API key: " API_KEY
+    export api_key=$API_KEY
+fi
 # Check the input and set the file URL accordingly
 if [ "$node_name" == "validator-node" ]; then
   log_path="$log_dir/supra_node_logs/supra.log"
