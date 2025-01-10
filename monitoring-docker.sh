@@ -100,6 +100,7 @@ services:
     container_name: promtail
     volumes:
       - ./promtail:/promtail
+      - ./promtail/config.yml:/etc/promtail/config.yml:ro
       # - /var/log:/var/log
       - $log_path:/var/log/user_logs/user_logs.log
 
