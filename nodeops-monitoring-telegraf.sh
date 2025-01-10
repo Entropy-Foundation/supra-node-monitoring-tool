@@ -66,6 +66,8 @@ apt-get install -y promtail
 
 echo "promtail installation completed."
 
+user=$(who am i | awk '{print $1}')
+
 # Copy promtail service configuration
 echo "Copying promtail service configuration..."
 tee /etc/systemd/system/promtail.service << EOF
@@ -75,7 +77,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
+User=$user
 ExecStart=/usr/bin/promtail -config.file /etc/promtail/config.yml
 TimeoutSec=60
 Restart=on-failure
@@ -282,9 +284,9 @@ rm /etc/telegraf/telegraf.conf*
 
 # Check the input and set the file URL accordingly
 if [ "$node_name" == "validator-node" ]; then
-  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/1bfff68f9b9a3a7065375ee8dce92fba72e5245f/telegraf-vals.conf"
+  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/af6ad516dc3dfb8c2d3952956fee705a03895c36/telegraf-vals.conf"
 elif [ "$node_name" == "rpc-node" ]; then
-  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/1bfff68f9b9a3a7065375ee8dce92fba72e5245f/telegraf-rpc.conf"
+  file_url="https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/af6ad516dc3dfb8c2d3952956fee705a03895c36/telegraf-rpc.conf"
 else
   echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
   exit 1
@@ -297,8 +299,6 @@ updated_content=$(echo "$file_content" | sed "s|{{ agent_name }}|$job|g; s|{{ LO
 
 echo "$updated_content" | sudo tee /etc/telegraf/telegraf.conf > /dev/null
 
-
-read -p "Please provide the user name which you want to run the telegraf service: " node_name
 
 # curl -L https://gist.githubusercontent.com/Supra-RaghulRajeshR/33d027b21be6f190c0c66e34fee3a9a1/raw/58766426b95347313d30232b1720234089178303/telegraf.service -o /lib/systemd/system/telegraf.service
 cat << EOF > /lib/systemd/system/telegraf.service
