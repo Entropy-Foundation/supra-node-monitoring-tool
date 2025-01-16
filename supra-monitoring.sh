@@ -11,14 +11,16 @@ read -r -p "Please confirm this node is validator-node or rpc-node: " node_name
 if [ "$node_name" == "validator-node" ]; then
   read -r -p "Please enter the ${node_name} log path: " log_dir
   log_path="$log_dir/supra_node_logs/supra.log"
+  echo "The ${node_name} log path you entered is: $log_path"
 elif [ "$node_name" == "rpc-node" ]; then
   read -r -p "Please enter the ${node_name} log path: " log_dir
   log_path="$log_dir/rpc_node_logs/rpc_node.log"
+  echo "The ${node_name} log path you entered is: $log_path"
 else
   echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
   exit 1
 fi
-echo "The log path you entered is: $log_path"
+
 public_ip=$(curl -s ifconfig.me)
 
 user=$(whoami)
@@ -99,7 +101,7 @@ cat > docker-compose.yml << EOF
 services:
   promtail:
     image: grafana/promtail:2.9.2
-    container_name: promtail
+    container_name: supra-central-promtail
     volumes:
       - ./promtail:/promtail
       - ./promtail/config.yml:/etc/promtail/config.yml
@@ -112,7 +114,7 @@ services:
 
   telegraf:
     image: telegraf:1.32.2
-    container_name: telegraf
+    container_name: supra-central-telegraf
     user: root:root
     volumes:
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
