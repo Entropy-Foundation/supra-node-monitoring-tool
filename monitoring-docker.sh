@@ -1,12 +1,13 @@
 #!/bin/bash
+# Check if API key is set
+if [ -z "$api_key" ]; then
+    read -p "Enter API key: " API_KEY
+    export api_key=$API_KEY
+fi
+
 read -r -p "Please enter the log path: " log_dir
 read -r -p "Please confirm this node is validator-node or rpc-node: " node_name
 
-# Check if API key is set
-if [ -z "$api_key" ]; then
-    read -p "Enter API key: " api_key
-    export api_key=$api_key
-fi
 # Check the input and set the file URL accordingly
 if [ "$node_name" == "validator-node" ]; then
   log_path="$log_dir/supra_node_logs/supra.log"
@@ -79,15 +80,16 @@ positions:
 
 clients:
   - url: https://loki.services.supra.com/loki/api/v1/push
-    batchsize: 1024000
-    batchwait: 1s            
+    batchsize: 10000
+    batchwait: 60s
+
 scrape_configs:
-  - job_name: ${job}
+  - job_name: ${title}
     static_configs:
       - targets:
           - localhost
         labels:
-          job: ${title}
+          job: ${job}
           __path__: "/var/log/user_logs/user_logs.log"
 EOF
 
@@ -101,7 +103,7 @@ services:
     container_name: promtail
     volumes:
       - ./promtail:/promtail
-      - ./promtail/config.yml:/etc/promtail/config.yml:ro
+      - ./promtail/config.yml:/etc/promtail/config.yml
       # - /var/log:/var/log
       - $log_path:/var/log/user_logs/user_logs.log
 
@@ -270,7 +272,7 @@ else
   echo "Failed to create dashboard. HTTP status: $create_dashboard_status"
   echo "Response body: $create_dashboard_response_body"
   rm /tmp/create_dashboard_response.txt
-  rm new-dashboard.json
+  rm /tmp/new-dashboard.json
   exit 1
 fi
 
