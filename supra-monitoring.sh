@@ -20,8 +20,8 @@ else
   echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
   exit 1
 fi
-
-public_ip=$(curl -s ifconfig.me)
+read -r -p "Please share the public ipv4 of this server: " public_ip
+# public_ip=$(curl -s ifconfig.me)
 
 user=$(whoami)
 
