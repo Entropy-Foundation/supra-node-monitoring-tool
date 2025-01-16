@@ -95,8 +95,6 @@ EOF
 
 # Update docker-compose.yml to include InfluxDB
 cat > docker-compose.yml << EOF
-version: '3.8'
-
 services:
   promtail:
     image: grafana/promtail:2.9.2
