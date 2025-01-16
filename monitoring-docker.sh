@@ -7,8 +7,6 @@ fi
 
 read -r -p "Please confirm this node is validator-node or rpc-node: " node_name
 
-
-
 # Check the input and set the file URL accordingly
 if [ "$node_name" == "validator-node" ]; then
   read -r -p "Please enter the ${node_name} log path: " log_dir
