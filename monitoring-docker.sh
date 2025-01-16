@@ -5,13 +5,16 @@ if [ -z "$api_key" ]; then
     export api_key=$API_KEY
 fi
 
-read -r -p "Please enter the log path: " log_dir
 read -r -p "Please confirm this node is validator-node or rpc-node: " node_name
+
+
 
 # Check the input and set the file URL accordingly
 if [ "$node_name" == "validator-node" ]; then
+  read -r -p "Please enter the ${node_name} log path: " log_dir
   log_path="$log_dir/supra_node_logs/supra.log"
 elif [ "$node_name" == "rpc-node" ]; then
+  read -r -p "Please enter the ${node_name} log path: " log_dir
   log_path="$log_dir/rpc_node_logs/rpc_node.log"
 else
   echo "Invalid input. Please enter 'validator-node' or 'rpc-node'."
