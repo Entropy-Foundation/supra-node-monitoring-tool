@@ -79,7 +79,8 @@ positions:
 
 clients:
   - url: https://loki.services.supra.com/loki/api/v1/push
-
+    batchsize: 1024000
+    batchwait: 1s            
 scrape_configs:
   - job_name: ${job}
     static_configs:
