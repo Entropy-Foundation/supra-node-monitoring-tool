@@ -7,8 +7,8 @@ import sys
 
 # Directory where the logs are stored
 parent_dir = sys.argv[1]
-log_dir = os.path.join(parent_dir, "rpc_node_logs")
-epoch_file_pattern = "rpc_node.log*"
+log_dir = os.path.join(parent_dir, "log")
+epoch_file_pattern = "supra-fullnode.log*"
 
 def add_seconds_to_timestamp(timestamp_str, seconds):
     # Replace "Z+00:00" or "Z" with "+00:00" for compatibility with fromisoformat

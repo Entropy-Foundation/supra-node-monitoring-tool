@@ -4,7 +4,7 @@ import subprocess
 from datetime import datetime
 import sys
 log_directory = sys.argv[1]
-log_files = os.path.join(log_directory, "rpc_node_logs/rpc_node.log")
+log_files = os.path.join(log_directory, "log/supra-fullnode.log")
 
 
 def extract_timestamp(line, pattern):

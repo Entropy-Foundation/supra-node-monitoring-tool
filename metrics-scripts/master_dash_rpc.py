@@ -10,7 +10,7 @@ import sys
 # Use /tmp directory to avoid permission issues
 CACHE_FILE = "/tmp/ip_location_cache.json"  # File to store the cached IP and location data
 log_directory = sys.argv[1]
-log_dir = os.path.join(log_directory, "rpc_node_logs")
+log_dir = os.path.join(log_directory, "log")
 
 def save_to_cache(data):
     """Save IP and location data to a JSON file."""

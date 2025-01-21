@@ -5,9 +5,9 @@ from dateutil import parser
 import sys
 parent_dir = sys.argv[1]
 
-log_dir = os.path.join(parent_dir, "rpc_node_logs")
+log_dir = os.path.join(parent_dir, "log")
 
-epoch_file_pattern = "rpc_node.log*"
+epoch_file_pattern = "supra-fullnode.log*"
 
 def find_latest_log_file():
     files = sorted(glob.glob(f"{log_dir}/{epoch_file_pattern}"), key=os.path.getmtime, reverse=True)

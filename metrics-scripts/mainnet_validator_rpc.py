@@ -11,7 +11,7 @@ import sys
 # Constants
 CACHE_FILE = "/tmp/ip_location_cache.json"  # Cache file for IP location data
 log_directory = sys.argv[1]
-log_dir = os.path.join(log_directory, "rpc_node_logs/")
+log_dir = os.path.join(log_directory, "log/")
 GRAFANA_URL = "https://monitoring.services.supra.com"
 API_KEY = ""
 
@@ -91,7 +91,7 @@ def get_ip_and_location():
 
 def get_latest_log_file(log_dir):
     """Find the latest log file."""
-    log_files = glob.glob(os.path.join(log_dir, 'rpc_node.log*'))  # Match rpc_node.log files with timestamps
+    log_files = glob.glob(os.path.join(log_dir, 'supra-fullnode.log*'))  # Match supra-fullnode.log files with timestamps
     if log_files:
         # Return the latest log file based on modification time
         latest_log = max(log_files, key=os.path.getmtime)

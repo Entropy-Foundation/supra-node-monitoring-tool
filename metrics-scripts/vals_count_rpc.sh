@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG_FILE="$1/rpc_node_logs/rpc_node.log"
+LOG_FILE="$1/log/supra-fullnode.log"
 
 # Check if the log file exists
 if ! ls $LOG_FILE* 1> /dev/null 2>&1; then

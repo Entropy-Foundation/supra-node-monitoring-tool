@@ -6,11 +6,11 @@ import sys
 # Directory where the logs are stored
 parent_dir = sys.argv[1]
 
-log_dir = os.path.join(parent_dir, "rpc_node_logs")
+log_dir = os.path.join(parent_dir, "log")
 
 def get_latest_log_file(log_dir):
     """Finds the latest log file based on modification time."""
-    log_files = glob.glob(os.path.join(log_dir, 'rpc_node.log*'))
+    log_files = glob.glob(os.path.join(log_dir, 'supra-fullnode.log*'))
     if log_files:
         return max(log_files, key=os.path.getmtime)
     return None
