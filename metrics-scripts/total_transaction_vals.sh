@@ -9,7 +9,7 @@ total_sum=$(awk '
     END {
         print sum              # Print the total sum
     }
-' $1/supra_node_logs/supra.log*)
+' $1/log/supra.log*)
 
 # Print the result in InfluxDB line protocol format
 echo "total_transactions value=$total_sum"

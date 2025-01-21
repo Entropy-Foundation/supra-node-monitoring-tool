@@ -11,7 +11,7 @@ import sys
 # Constants
 CACHE_FILE = "/tmp/ip_location_cache.json"  # Cache file for IP location data
 log_directory = sys.argv[1]
-log_dir = os.path.join(log_directory, "supra_node_logs/")
+log_dir = os.path.join(log_directory, "log/")
 GRAFANA_URL = "https://monitoring.services.supra.com"
 API_KEY = ""
 

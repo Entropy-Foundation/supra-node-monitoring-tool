@@ -5,7 +5,7 @@ from dateutil import parser
 import sys
 parent_dir = sys.argv[1]
 
-log_dir = os.path.join(parent_dir, "supra_node_logs")
+log_dir = os.path.join(parent_dir, "log")
 
 epoch_file_pattern = "supra.log*"
 

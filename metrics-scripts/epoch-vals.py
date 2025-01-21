@@ -7,7 +7,7 @@ import sys
 
 # Directory where the logs are stored
 parent_dir = sys.argv[1]
-log_dir = os.path.join(parent_dir, "supra_node_logs")
+log_dir = os.path.join(parent_dir, "log")
 epoch_file_pattern = "supra.log*"
 
 def add_seconds_to_timestamp(timestamp_str, seconds):

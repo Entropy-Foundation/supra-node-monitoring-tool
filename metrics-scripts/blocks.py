@@ -6,7 +6,7 @@ import sys
 # Directory where the logs are stored
 parent_dir = sys.argv[1]
 
-log_dir = os.path.join(parent_dir, "supra_node_logs")
+log_dir = os.path.join(parent_dir, "log")
 
 def get_latest_log_file(log_dir):
     """Finds the latest log file based on modification time."""
