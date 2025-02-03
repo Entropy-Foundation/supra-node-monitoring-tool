@@ -173,7 +173,7 @@ def get_service_uptime(service_name):
         return "Error retrieving uptime"
 
 def main():
-    service_name = "supra-smr.service"
+    service_name = "supra.service"
     ip_location_data = get_ip_and_location()
     # version_tag = get_version_tag()
     latest_log = get_latest_log_file(log_dir)

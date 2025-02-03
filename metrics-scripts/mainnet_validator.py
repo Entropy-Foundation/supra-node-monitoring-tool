@@ -8,6 +8,9 @@ from datetime import datetime
 import glob
 import urllib.parse
 import sys
+from dateutil import parser
+from datetime import datetime, timezone
+
 # Constants
 CACHE_FILE = "/tmp/ip_location_cache.json"  # Cache file for IP location data
 log_directory = sys.argv[1]
@@ -76,19 +79,6 @@ def get_ip_and_location():
     save_to_cache(data)
     return data
 
-# def get_version_tag():
-#     """Fetch the version tag from the binary."""
-#     command = ["/home/ubuntu/supra", "--version"]
-#     try:
-#         result = subprocess.run(command, capture_output=True, text=True, check=True)
-#         tag_line = next((line for line in result.stdout.splitlines() if 'tag:' in line), None)
-#         if tag_line:
-#             match = re.search(r'tag:\s*(\S+)', tag_line)
-#             return match.group(1) if match else "Unknown"
-#     except subprocess.CalledProcessError as e:
-#         print(f"Error fetching version tag: {e}")
-#     return "Unknown"
-
 def get_latest_log_file(log_dir):
     """Find the latest log file."""
     log_files = glob.glob(os.path.join(log_dir, 'supra.log*'))  
@@ -130,12 +120,6 @@ def fetch_api_block_metrics():
         print(f"Error fetching API metrics: {e}")
         return None
 
-def format_uptime(uptime_seconds):
-    """Format uptime as total days and hours."""
-    days = uptime_seconds // 86400
-    hours = (uptime_seconds % 86400) // 3600
-    return f"{days}d {hours}h"
-
 def get_service_uptime(service_name):
     """Get the uptime of the service."""
     try:
@@ -147,10 +131,16 @@ def get_service_uptime(service_name):
         )
         match = re.search(r'Active: active \(running\) since (.+?);', result.stdout)
         if match:
-            uptime_str = match.group(1).replace(" UTC", "")
-            uptime = datetime.strptime(uptime_str, "%a %Y-%m-%d %H:%M:%S")
-            delta = datetime.utcnow() - uptime
-            return format_uptime(delta.total_seconds())
+            uptime_str = match.group(1)
+            try:
+                # Use dateutil parser which handles various time formats better
+                uptime = parser.parse(uptime_str)
+                delta = datetime.now(uptime.tzinfo) - uptime
+                days = delta.days
+                hours = delta.seconds // 3600
+                return f"{days}d {hours}h"
+            except Exception as e:
+                print(f"Error parsing uptime date: {e}")
     except Exception as e:
         print(f"Error getting service uptime: {e}")
     return "Unknown"
@@ -161,35 +151,20 @@ def check_proposing_status():
         f"awk '/Proposing.*SmrBlock/ {{ print $0 }}' $(ls -t {log_dir}* | head -n 2) "
         "| sort -k1,2 -r | head -n 1"
     )
-    current_time_str = subprocess.check_output(
-        ["date", "--utc", "+%Y-%m-%dT%H:%M:%S.%6NZ+00:00"], text=True
-    ).strip()
-    current_time = datetime.strptime(current_time_str[:-6], "%Y-%m-%dT%H:%M:%S.%fZ")
+    current_time = datetime.now(timezone.utc)
 
     try:
         latest_log = subprocess.check_output(log_command, shell=True, text=True).strip()
         if latest_log:
             log_timestamp_str = latest_log.split("]")[0][1:]
             log_time = datetime.strptime(log_timestamp_str[:-6], "%Y-%m-%dT%H:%M:%S.%fZ")
+            # Make log_time timezone aware
+            log_time = log_time.replace(tzinfo=timezone.utc)
             time_diff = abs((current_time - log_time).total_seconds())
             return "proposing" if time_diff <= 600 else "not_proposing"
     except Exception as e:
         print(f"Error processing proposing status: {e}")
     return "not_proposing"
-
-def get_instance_zone():
-    """Fetch the instance zone from Google Cloud metadata."""
-    try:
-        response = subprocess.run(
-            ['curl', '-s', 'http://metadata.google.internal/computeMetadata/v1/instance/zone',
-             '-H', 'Metadata-Flavor: Google'],
-            capture_output=True, text=True, check=True
-        )
-        zone = response.stdout.split('/')[-1]
-        return sanitize_string(zone)
-    except subprocess.CalledProcessError as e:
-        print(f"Error fetching instance zone: {e}")
-        return "Unknown_zone"
 
 def fetch_dashboards(grafana_url, api_key, public_ip):
     headers = {
@@ -212,15 +187,13 @@ def fetch_dashboards(grafana_url, api_key, public_ip):
     return []
 
 def main():
-    service_name = "supra-smr.service"  # Updated service name
+    service_name = "supra.service"
     ip_location_data = get_ip_and_location()
-    # version_tag = get_version_tag()
     latest_log = get_latest_log_file(log_dir)
     log_metrics = extract_latest_metrics(latest_log) if latest_log else {}
     api_metrics = fetch_api_block_metrics()
     uptime = get_service_uptime(service_name)
     proposing_status = check_proposing_status()
-    zone = get_instance_zone()
 
     sync_status = 500
     if log_metrics and api_metrics:
@@ -235,11 +208,14 @@ def main():
     dashboards = fetch_dashboards(GRAFANA_URL, API_KEY, public_ip)
     dashboards_output = ";".join(dashboards) if dashboards else "None"
 
-    print(f"ip=\"{sanitize_string(ip_location_data['ip'])}\",latitude={ip_location_data['latitude']},"
-          f"longitude={ip_location_data['longitude']},region=\"{sanitize_string(ip_location_data['region'])}\" "
+    print(f"ip=\"{sanitize_string(ip_location_data['ip'])}\","
+          f"latitude={ip_location_data['latitude']},"
+          f"longitude={ip_location_data['longitude']},"
+          f"region=\"{sanitize_string(ip_location_data['region'])}\","
           f"uptime=\"{sanitize_string(uptime)}\","
-          f"sync_status={sync_status},proposing_status=\"{sanitize_string(proposing_status)}\","
-          f"zone=\"{sanitize_string(zone)}\",dashboards=\"{dashboards_output}\"")
+          f"sync_status={sync_status},"
+          f"proposing_status=\"{sanitize_string(proposing_status)}\","
+          f"dashboards=\"{dashboards_output}\"")
 
 if __name__ == "__main__":
     main()
