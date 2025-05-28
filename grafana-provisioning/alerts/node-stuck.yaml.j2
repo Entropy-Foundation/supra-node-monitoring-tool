@@ -7,9 +7,9 @@ groups:
       rules:
         - uid: my_uid_1
           title: Block Height stuck
-          condition: C
+          condition: is_block_height_stuck
           data:
-            - refId: A
+            - refId: block_height_diff
               relativeTimeRange:
                 from: 21600
                 to: 0
@@ -30,8 +30,8 @@ groups:
                       |> aggregateWindow(every: 2m, fn: last, createEmpty: false) // to prevent alert noises
                       |> difference(nonNegative: true)
                 range: true
-                refId: A
-            - refId: B
+                refId: block_height_diff
+            - refId: block_height_diff_mean
               datasourceUid: __expr__
               model:
                 conditions:
@@ -50,13 +50,13 @@ groups:
                 datasource:
                     type: __expr__
                     uid: __expr__
-                expression: A
+                expression: block_height_diff
                 intervalMs: 1000
                 maxDataPoints: 43200
                 reducer: mean
-                refId: B
+                refId: block_height_diff_mean
                 type: reduce
-            - refId: C
+            - refId: is_block_height_stuck
               datasourceUid: __expr__
               model:
                 conditions:
@@ -68,7 +68,7 @@ groups:
                         type: and
                       query:
                         params:
-                            - C
+                            - is_block_height_stuck
                       reducer:
                         params: []
                         type: last
@@ -76,10 +76,10 @@ groups:
                 datasource:
                     type: __expr__
                     uid: __expr__
-                expression: B
+                expression: block_height_diff
                 intervalMs: 1000
                 maxDataPoints: 43200
-                refId: C
+                refId: is_block_height_stuck
                 type: threshold
           noDataState: Alerting
           execErrState: Alerting
