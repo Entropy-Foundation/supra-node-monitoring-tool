@@ -1,0 +1,91 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: Supra-node
+      folder: alerts
+      interval: 1m
+      rules:
+        - uid: my_uid_1
+          title: Block Height stuck
+          condition: is_block_height_stuck
+          data:
+            - refId: block_height_diff
+              relativeTimeRange:
+                from: 21600
+                to: 0
+              datasourceUid: edhfdvk2zkb28f
+              model:
+                datasource:
+                    type: influxdb
+                    uid: edhfdvk2zkb28f
+                instant: false
+                intervalMs: 15000
+                maxDataPoints: 2000
+                query: |-
+                    from(bucket: "supra-metrics")
+                      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                      |> filter(fn: (r) => r["host"] == "{{ node_name }}")
+                      |> filter(fn: (r) => r["_measurement"] == "block_values")
+                      |> filter(fn: (r) => r["_field"] == "block_height")
+                      |> aggregateWindow(every: 2m, fn: last, createEmpty: false) // to prevent alert noises
+                      |> difference(nonNegative: true)
+                range: true
+                refId: block_height_diff
+            - refId: block_height_diff_mean
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: block_height_diff
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: mean
+                refId: block_height_diff_mean
+                type: reduce
+            - refId: is_block_height_stuck
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: eq
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - is_block_height_stuck
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: block_height_diff
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: is_block_height_stuck
+                type: threshold
+          noDataState: Alerting
+          execErrState: Alerting
+          for: 1m
+          annotations:
+          labels: {}
+          isPaused: false
+          notification_settings:
+            receiver: Pagerduty
